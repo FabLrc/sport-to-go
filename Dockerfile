@@ -32,7 +32,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
 
-# Définir les bonnes permissions pour le cache de pré-rendu
+# Définir les permissions pour le cache de pré-rendu
 RUN mkdir .next
 RUN chown nextjs:nodejs .next
 
