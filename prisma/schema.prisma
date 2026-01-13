@@ -1,0 +1,75 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Program {
+  id          Int       @id @default(autoincrement())
+  name        String
+  startDate   DateTime
+  cycleDays   Int       // Nombre de jours dans une boucle (ex: 7 pour une semaine)
+  totalCycles Int       // Combien de fois on répète la boucle
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  sessions    Session[]
+}
+
+model Session {
+  id         Int          @id @default(autoincrement())
+  programId  Int
+  program    Program      @relation(fields: [programId], references: [id], onDelete: Cascade)
+  name       String
+  dayInCycle Int          // Quel jour de la boucle (ex: Jour 1, Jour 3...)
+  exercises  Exercise[]
+  logs       WorkoutLog[]
+}
+
+model Exercise {
+  id              Int              @id @default(autoincrement())
+  sessionId       Int
+  session         Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  name            String
+  sets            Int
+  reps            Int
+  restTime        Int              // Temps de repos en secondes
+  order           Int
+  performanceLogs PerformanceLog[]
+}
+
+model WorkoutLog {
+  id          Int              @id @default(autoincrement())
+  sessionId   Int
+  session     Session          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  date        DateTime         @default(now())
+  completed   Boolean          @default(false)
+  performance PerformanceLog[]
+}
+
+model PerformanceLog {
+  id           Int        @id @default(autoincrement())
+  workoutLogId Int
+  workoutLog   WorkoutLog @relation(fields: [workoutLogId], references: [id], onDelete: Cascade)
+  exerciseId   Int
+  exercise     Exercise   @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  setNumber    Int
+  repsCompleted Int
+  weight       Float?     // Poids utilisé (optionnel)
+  completed    Boolean    @default(false)
+}
+
+model BodyMetric {
+  id        Int      @id @default(autoincrement())
+  date      DateTime @default(now())
+  weight    Float?   // Poids corporel en kg
+  chest     Float?   // Tour de poitrine
+  waist     Float?   // Tour de taille
+  hips      Float?   // Tour de hanches
+  arms      Float?   // Tour de bras
+  thighs    Float?   // Tour de cuisses
+  notes     String?
+}
